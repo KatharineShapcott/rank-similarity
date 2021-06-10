@@ -31,10 +31,10 @@ export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
 # BUILD DOCS #
 ##############
  
-# build our documentation with sphinx (see docs/conf.py)
+# build our documentation with sphinx (see doc/conf.py)
 # * https://www.sphinx-doc.org/en/master/usage/quickstart.html#running-the-build
-make -C docs clean
-make -C docs html
+make -C doc clean
+make -C doc html
  
 #######################
 # Update GitHub Pages #
@@ -64,7 +64,7 @@ cat > README.md <<EOF
 Nothing to see here. The contents of this branch are essentially a cache that's not intended to be viewed on github.com.
  
  
-If you're looking to update our documentation, check the relevant development branch's 'docs/' dir.
+If you're looking to update our documentation, check the relevant development branch's 'doc/' dir.
  
 For more information on how this documentation is built using Sphinx, Read the Docs, and GitHub Actions/Pages, see:
  
