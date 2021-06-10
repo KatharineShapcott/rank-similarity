@@ -22,7 +22,7 @@ import sphinx_rtd_theme
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../src'))
+sys.path.insert(0, os.path.abspath('../ranksim'))
 
 # -- General configuration ------------------------------------------------
 
@@ -82,8 +82,8 @@ copyright = u'2021, Katharine Shapcott'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-from ranksim import __version__
+# The short X.Y version
+from _version import __version__
 version = __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__
