@@ -1,0 +1,9 @@
+certifi==2021.5.30
+joblib==1.0.1
+numpy==1.20.3
+pip==21.1.2
+scikit-learn==0.24.2
+scipy==1.6.3
+setuptools==49.6.0.post20210108
+threadpoolctl==2.1.0
+wheel==0.36.2
