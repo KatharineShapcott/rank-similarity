@@ -1,8 +1,8 @@
-# rank-similarity
+# Rank Similarity
 
-Rank Similarity is a set of non-linear classification and transform tools for large datasets with many features that use the scikit-learn API. 
+Rank Similarity is a set of non-linear classification and transform tools for large multi-dimensional datasets that use the scikit-learn API. 
 
-# Installation
+## Installation
 ### Dependencies
 rank-similarity requires:
 
@@ -28,7 +28,7 @@ To get the latest development version, clone the GitHub repository:
 git clone https://github.com/KatharineShapcott/rank-similarity
 ```
 
-# Usage
+## Usage
 
 ``` python
 from ranksim import RankSimilarityClassifier
@@ -39,11 +39,17 @@ clf.fit(X, y)
 pred = clf.predict(X)
 ```
 
-# Documentation
+## More Information
 
+### Documentation
 More details and background information is available in the
-[online documentation]().
+[online documentation](https://katharineshapcott.github.io/rank-similarity/).
 
-# Citation
+### License
+The package is new BSD licensed.
 
-Please cite the following publication (in preparation) 
+### Citation
+Please cite the following publication (in preparation) [[1]](#1).
+
+<a id="1">[1]</a> 
+Shapcott, Bird, & Singer. Confusion-based rank similarity filters for computationally-efficient machine learning on high dimensional data. In preperation. (2021)
