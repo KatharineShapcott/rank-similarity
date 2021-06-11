@@ -23,6 +23,7 @@ import sphinx_rtd_theme
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../ranksim'))
 
 # -- General configuration ------------------------------------------------
 
@@ -83,7 +84,7 @@ copyright = u'2021, Katharine Shapcott'
 # built documents.
 #
 # The short X.Y version
-from rankdata import __version__
+from ranksim import __version__
 version = __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__
