@@ -17,8 +17,6 @@ To get the package clone the ``rank-similarity`` repository::
 2. Install via pip 
 -------------------------------------------
 
-This is not implemented yet. 
-
     $ pip install rank-similarity
 
 

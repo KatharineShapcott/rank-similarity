@@ -21,7 +21,7 @@ URL = 'https://github.com/KatharineShapcott/rank-similarity'
 LICENSE = 'new BSD'
 DOWNLOAD_URL = 'https://github.com/KatharineShapcott/rank-similarity'
 VERSION = __version__
-INSTALL_REQUIRES = ['numpy', 'scipy', 'scikit-learn']
+INSTALL_REQUIRES = ['scikit-learn>=0.23', 'numpy>=1.14.6', 'scipy>=1.1.0']
 CLASSIFIERS = ['Intended Audience :: Science/Research',
                'Intended Audience :: Developers',
                'License :: OSI Approved',
