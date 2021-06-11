@@ -17,9 +17,9 @@ set -x
 ###################
  
 apt-get update
-apt-get -y install git rsync python3-pip 
+apt-get -y install rsync #git python3-pip 
 
-pip3 install sphinx sphinx-gallery sphinx_rtd_theme matplotlib numpydoc pillow
+# pip3 install sphinx sphinx-gallery sphinx_rtd_theme matplotlib numpydoc pillow
 
 #####################
 # DECLARE VARIABLES #
