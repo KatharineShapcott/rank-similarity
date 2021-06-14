@@ -25,7 +25,7 @@ pip install rank-similarity
 To get the latest development version, clone the GitHub repository:
 
 ```
-git clone https://github.com/KatharineShapcott/rank-similarity
+git clone https://github.com/KatharineShapcott/rank-similarity.git
 ```
 
 ## Usage
