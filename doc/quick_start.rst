@@ -2,22 +2,20 @@
 Quick Start with Rank Similarity
 #####################################
 
-
 Installing Rank Similarity
 ===================================================
 
-1. Clone from github
--------------------------------------
-
-To get the package clone the ``rank-similarity`` repository::
-
-    $ git clone https://github.com/KatharineShapcott/project-template.git
-
-
-2. Install via pip 
+1. Install via pip
 -------------------------------------------
+
+::
 
     $ pip install rank-similarity
 
+2. Clone from github
+-------------------------------------
 
+To get the latest development version, clone the GitHub repository::
+
+    $ git clone https://github.com/KatharineShapcott/rank-similarity.git
 
