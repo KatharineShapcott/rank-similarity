@@ -42,6 +42,10 @@ using the raw Olivetti faces dataset and a linear support vector machine.
     Pipeline(...)
     >>> pipe.score(X_test, y_test)
     0.85
+    
+.. topic:: Examples:
+
+  * :ref:`sphx_glr_auto_examples_plot_transformer.py`: an example of transformation using RST.
 
 .. _classification:
 
@@ -50,8 +54,8 @@ Classification
 
 The rank similarity classifiers are very fast non-linear classifiers. They use
 the responses of rank similarity filters made from the input data to classify
-new samples. Both :class:`RankSimilarityClassifier` and :class:`RSPClassifier` are able to perform binary and
-multi-class classification.
+new samples. Both :class:`RankSimilarityClassifier` and :class:`RSPClassifier` are able to perform 
+binary and multi-class classification.
 
 
 Use it with the fit and predict methods from scikit-learn:
@@ -65,7 +69,7 @@ The predict method can then be used by the score method:
 
 * at ``score``, compute the accuracy score of the predictions.
 
-RankSimilarityClassifier and RSPClassifier are fit using two arrays: an array X
+:class:`RankSimilarityClassifier` and :class:`RSPClassifier` are fit using two arrays: an array X
 of shape (n_samples, n_features) holding the training samples, and an array y of
 class labels (strings or integers), of shape (n_samples):
 
