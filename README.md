@@ -57,4 +57,28 @@ Shapcott, Bird, & Singer. Confusion-based rank similarity filters for computatio
 ## Contributors
 
 <!-- readme: collaborators,contributors -start -->
+<table>
+<tr>
+    <td align="center">
+        <a href="https://github.com/synapsesanddendrites">
+            <img src="https://avatars.githubusercontent.com/u/51414565?v=4" width="100;" alt="synapsesanddendrites"/>
+            <br />
+            <sub><b>synapsesanddendrites</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/KatharineShapcott">
+            <img src="https://avatars.githubusercontent.com/u/65502584?v=4" width="100;" alt="KatharineShapcott"/>
+            <br />
+            <sub><b>KatharineShapcott</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/kshapcott">
+            <img src="https://avatars.githubusercontent.com/u/25589262?v=4" width="100;" alt="kshapcott"/>
+            <br />
+            <sub><b>kshapcott</b></sub>
+        </a>
+    </td></tr>
+</table>
 <!-- readme: collaborators,contributors -end -->
