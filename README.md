@@ -63,7 +63,7 @@ Shapcott, Bird, & Singer. Confusion-based rank similarity filters for computatio
         <a href="https://github.com/synapsesanddendrites">
             <img src="https://avatars.githubusercontent.com/u/51414565?v=4" width="100;" alt="synapsesanddendrites"/>
             <br />
-            <sub><b>synapsesanddendrites</b></sub>
+            <sub><b>Synapsesanddendrites</b></sub>
         </a>
     </td>
     <td align="center">
@@ -77,7 +77,7 @@ Shapcott, Bird, & Singer. Confusion-based rank similarity filters for computatio
         <a href="https://github.com/kshapcott">
             <img src="https://avatars.githubusercontent.com/u/25589262?v=4" width="100;" alt="kshapcott"/>
             <br />
-            <sub><b>kshapcott</b></sub>
+            <sub><b>Kshapcott</b></sub>
         </a>
     </td></tr>
 </table>
