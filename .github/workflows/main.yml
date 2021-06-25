@@ -8,6 +8,6 @@ jobs:
         name: A job to automate contrib in readme
         steps:
             - name: Contribute List
-              uses: akhilmhdh/contributors-readme-action@v2.1.2
+              uses: akhilmhdh/contributors-readme-action@7d7e97daaf20981caf07dc54347a80a88b936228
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
