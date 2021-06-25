@@ -53,3 +53,8 @@ Please cite the following publication (in preparation) [[1]](#1).
 
 <a id="1">[1]</a> 
 Shapcott, Bird, & Singer. Confusion-based rank similarity filters for computationally-efficient machine learning on high dimensional data. In preperation. (2021)
+
+## Contributors
+
+<!-- readme: collaborators,contributors -start -->
+<!-- readme: collaborators,contributors -end -->
