@@ -1,0 +1,12 @@
+﻿:mod:`ranksim`.RankSimilarityClassifier
+==============================================
+
+.. currentmodule:: ranksim
+
+.. autoclass:: RankSimilarityClassifier
+
+.. include:: ranksim.RankSimilarityClassifier.examples
+
+.. raw:: html
+
+    <div style='clear:both'></div>

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ranksim._classes &mdash; rank-similarity 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/project-template.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/js/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> rank-similarity
+          </a>
+              <div class="version">
+                0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start with Rank Similarity</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User guide: Using the Rank Similarity estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Rank Similarity API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial - Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">General examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rank-similarity</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>ranksim._classes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ranksim._classes</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.core.numeric</span> <span class="kn">import</span> <span class="n">count_nonzero</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mode</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">issparse</span><span class="p">,</span> <span class="n">csr_matrix</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">._base</span> <span class="kn">import</span> <span class="n">RankSimilarityMixin</span>
+<span class="kn">from</span> <span class="nn">._filters</span> <span class="kn">import</span> <span class="n">_unit_norm</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">_deprecate_positional_args</span><span class="p">,</span> <span class="n">check_is_fitted</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">check_random_state</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">class_distribution</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataDimensionalityWarning</span>
+
+
+<div class="viewcode-block" id="RankSimilarityTransform"><a class="viewcode-back" href="../../generated/ranksim.RankSimilarityTransform.html#ranksim.RankSimilarityTransform">[docs]</a><span class="k">class</span> <span class="nc">RankSimilarityTransform</span><span class="p">(</span><span class="n">RankSimilarityMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Rank Similarity Transform</span>
+<span class="sd">    </span>
+<span class="sd">    Transform the data base on responses of rank similarity filters. </span>
+<span class="sd">    Output dimensions are equal to n_filters. Values are between 0 and 1.</span>
+
+<span class="sd">    Read more in the :ref:`User Guide &lt;transform&gt;`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_filters : {&#39;auto&#39;} or int, default=&#39;auto&#39;</span>
+<span class="sd">        Number of filters to use. &#39;auto&#39; will determine this based on</span>
+<span class="sd">        max_filters, n_fast_filters and the size of the input data.</span>
+
+<span class="sd">    max_filters : int, default=5000</span>
+<span class="sd">        Maximum number of filters to allocate.</span>
+
+<span class="sd">        Only used when ``n_filters=&#39;auto&#39;``.</span>
+
+<span class="sd">    n_fast_filters: int, default=1000</span>
+<span class="sd">        Minimum number of filters to allocate, unless the input data has</span>
+<span class="sd">        fewer samples than this number.</span>
+
+<span class="sd">        Only used when ``n_filters=&#39;auto&#39;``.</span>
+
+<span class="sd">    initialize : {&#39;random&#39;,&#39;weighted_avg&#39;,&#39;plusplus&#39;}, default=&#39;random&#39;</span>
+<span class="sd">        Type of filter initialization.</span>
+
+<span class="sd">        - &#39;random&#39;, filters are initialized with a random data point.</span>
+
+<span class="sd">        - &#39;weighted_avg&#39;, creates filters from similar data, used when </span>
+<span class="sd">            there are more filters than input data.</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;plusplus&#39;, filters are initialized with dissimilar data as k-means++</span>
+
+<span class="sd">    spreading : {&#39;max&#39;, &#39;weighted_avg&#39;} or None, default=&#39;max&#39;</span>
+<span class="sd">        Determines how data is spread between filters during training</span>
+
+<span class="sd">        - &#39;max&#39;, the data point is allocated to the maximum responding</span>
+<span class="sd">            filter.</span>
+
+<span class="sd">        - &#39;weighted_avg&#39;, the weighted average of a fixed number of data </span>
+<span class="sd">            points are allocated to the maximum responding filter, used</span>
+<span class="sd">            when there are more filters than data.</span>
+<span class="sd">    </span>
+<span class="sd">    n_iter : int, default=5</span>
+<span class="sd">        Number of iterations/sweeps over the training dataset to perform</span>
+<span class="sd">        during training.</span>
+
+<span class="sd">    random_state : int, RandomState instance, default=None</span>
+<span class="sd">        Determines random number generation for filter initialization.</span>
+<span class="sd">        Pass an int for reproducible results across multiple function calls.</span>
+<span class="sd">    </span>
+<span class="sd">    filter_function : {&#39;auto&#39;} or callable, default=&#39;auto&#39;</span>
+<span class="sd">        Function which determines the weights from subsections of the input</span>
+<span class="sd">        data. &#39;auto&#39; performs a mean and rank, optionally drawn from a </span>
+<span class="sd">        distribution.</span>
+
+<span class="sd">    create_distribution : {&#39;confusion&#39;}, callable or None, default=None</span>
+<span class="sd">        Creates a distribution to draw ranks from. </span>
+
+<span class="sd">        - &#39;confusion&#39; is a distribution based on the confusibility of</span>
+<span class="sd">            features in the input data.</span>
+<span class="sd">        </span>
+<span class="sd">        Note: the &#39;confusion&#39; option is extremely slow.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filters_ : ndarray of shape (n_filters\_, n_features)</span>
+<span class="sd">        Weights of the calculated filters.</span>
+
+<span class="sd">    n_filters_ : int</span>
+<span class="sd">        Number of filters.</span>
+
+<span class="sd">    n_iter_ : int</span>
+<span class="sd">        The number of iterations run by the spreading function.</span>
+
+<span class="sd">    n_outputs_ : int</span>
+<span class="sd">        Number of outputs.</span>
+
+<span class="sd">    filterFactory_ : class</span>
+<span class="sd">        Class used to create the filters.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from multifilter import RankSimilarityTransform</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.datasets import load_digits</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = load_digits(return_X_y=True)</span>
+<span class="sd">    &gt;&gt;&gt; X.shape</span>
+<span class="sd">    (1797, 64)</span>
+<span class="sd">    &gt;&gt;&gt; embedding = RankSimilarityTransform(n_filters=10, n_iter=20, </span>
+<span class="sd">                                            random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; X_transformed = embedding.fit_transform(X)</span>
+<span class="sd">    &gt;&gt;&gt; X_transformed.shape</span>
+<span class="sd">    (1797, 10)</span>
+<span class="sd">    &gt;&gt;&gt; X_transformed[:1, :]</span>
+<span class="sd">    array([[0.22846891, 0.03269542, 0.        , 0.17862841, 0.23724085,</span>
+<span class="sd">        0.09489637, 0.        , 1.        , 0.47966508, 0.22846891]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@_deprecate_positional_args</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> 
+                <span class="n">n_filters</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">max_filters</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">n_fast_filters</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> 
+                <span class="n">initialize</span> <span class="o">=</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">spreading</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> 
+                <span class="n">n_iter</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                <span class="n">filter_function</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">create_distribution</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_filters</span> <span class="o">=</span> <span class="n">n_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_filters</span> <span class="o">=</span> <span class="n">max_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_fast_filters</span> <span class="o">=</span> <span class="n">n_fast_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span> <span class="o">=</span> <span class="n">initialize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spreading</span> <span class="o">=</span> <span class="n">spreading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_function</span> <span class="o">=</span> <span class="n">filter_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_distribution</span> <span class="o">=</span> <span class="n">create_distribution</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit the rank similarity transform from the training dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">            Training vector, where n_samples is the number of samples</span>
+<span class="sd">            and n_features is the number of features.</span>
+
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns the instance itself.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_design_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_initialize</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_spreading</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_n_filters</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preallocate_filters</span><span class="p">(</span><span class="n">n_features</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spread_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">_unit_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="c1">#*n_features #does this help?</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">n_best</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Transforms X.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">            Training vector, where n_samples is the number of samples</span>
+<span class="sd">            and n_features is the number of features.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        X_new : array-like of shape (n_samples, n_filters)</span>
+<span class="sd">            Transformed version of X where n_filters is the number of filters </span>
+<span class="sd">            specified or calculated during fitting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_function</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_best</span><span class="o">=</span><span class="n">n_best</span><span class="p">)</span>
+
+        <span class="n">response</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="RankSimilarityClassifier"><a class="viewcode-back" href="../../generated/ranksim.RankSimilarityClassifier.html#ranksim.RankSimilarityClassifier">[docs]</a><span class="k">class</span> <span class="nc">RankSimilarityClassifier</span><span class="p">(</span><span class="n">RankSimilarityMixin</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Rank Similarity Classifier</span>
+
+<span class="sd">    Read more in the :ref:`User Guide &lt;classification&gt;`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_filters : {&#39;auto&#39;} or int, default=&#39;auto&#39;</span>
+<span class="sd">        Number of filters to use. &#39;auto&#39; will determine this based on</span>
+<span class="sd">        max_filters, n_fast_filters and the size of the input data.</span>
+
+<span class="sd">    max_filters : int, default=5000</span>
+<span class="sd">        Maximum number of filters to allocate.</span>
+
+<span class="sd">        Only used when ``n_filters=&#39;auto&#39;``.</span>
+
+<span class="sd">    n_fast_filters: int, default=1000</span>
+<span class="sd">        Minimum number of filters to allocate, unless the input data has</span>
+<span class="sd">        fewer samples than this number.</span>
+
+<span class="sd">        Only used when ``n_filters=&#39;auto&#39;``.</span>
+
+<span class="sd">    initialize : {&#39;random&#39;,&#39;weighted_avg&#39;,&#39;plusplus&#39;}, default=&#39;random&#39;</span>
+<span class="sd">        Type of filter initialization.</span>
+
+<span class="sd">        - &#39;random&#39;, filters are initialized with a random data point.</span>
+
+<span class="sd">        - &#39;weighted_avg&#39;, creates filters from similar data, used when </span>
+<span class="sd">            there are more filters than input data.</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;plusplus&#39;, filters are initialized with dissimilar data as k-means++</span>
+
+<span class="sd">    spreading : {&#39;max&#39;, &#39;weighted_avg&#39;} or None, default=&#39;max&#39;</span>
+<span class="sd">        Determines how data is spread between filters during training</span>
+
+<span class="sd">        - &#39;max&#39;, the data point is allocated to the maximum responding</span>
+<span class="sd">            filter.</span>
+
+<span class="sd">        - &#39;weighted_avg&#39;, the weighted average of a fixed number of data </span>
+<span class="sd">            points are allocated to the maximum responding filter, used</span>
+<span class="sd">            when there are more filters than data.</span>
+
+<span class="sd">    class_weight : {&#39;balanced&#39;,&#39;uniform&#39;} or dict, {class_label: weight} \</span>
+<span class="sd">            default=&#39;balanced&#39;</span>
+<span class="sd">        Used to calculate the number of filters assigned to each class.</span>
+<span class="sd">        The &quot;balanced&quot; mode uses the values of y to automatically adjust</span>
+<span class="sd">        weights inversely proportional to class frequencies in the input data</span>
+<span class="sd">        as ``n_samples / (n_classes * np.bincount(y))``</span>
+
+<span class="sd">    n_iter : int, default=5</span>
+<span class="sd">        Number of iterations/sweeps over the training dataset to perform</span>
+<span class="sd">        during training.</span>
+
+<span class="sd">    random_state : int, RandomState instance, default=None</span>
+<span class="sd">        Determines random number generation for filter initialization.</span>
+<span class="sd">        Pass an int for reproducible results across multiple function calls.</span>
+
+<span class="sd">    filter_function : {&#39;auto&#39;} or callable, default=&#39;auto&#39;</span>
+<span class="sd">        Function which determines the weights from subsections of the input</span>
+<span class="sd">        data. &#39;auto&#39; performs a mean and rank, optionally drawn from a </span>
+<span class="sd">        distribution.</span>
+
+<span class="sd">    create_distribution : {&#39;confusion&#39;}, callable or None, default=None</span>
+<span class="sd">        Creates a distribution to draw ranks from. </span>
+
+<span class="sd">        - &#39;confusion&#39; is a distribution based on the confusibility of</span>
+<span class="sd">            features in the input data.</span>
+<span class="sd">        </span>
+<span class="sd">        Note: the &#39;confusion&#39; option is extremely slow.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    classes_ : ndarray or list of ndarray of shape (n_classes,)</span>
+<span class="sd">        Class labels for each output.</span>
+<span class="sd">        </span>
+<span class="sd">    filters_ : ndarray of shape (n_filters\_, n_features)</span>
+<span class="sd">        Weights of the calculated filters.</span>
+
+<span class="sd">    filter_labels_ : list of ndarray of shape (n_classes,)</span>
+<span class="sd">        Label of the datapoints used to make the filter.</span>
+
+<span class="sd">    n_class_filters_ : ndarray of shape (n_classes,)</span>
+<span class="sd">        Number of filters assigned to each class</span>
+
+<span class="sd">    n_filters_ : int</span>
+<span class="sd">        Number of filters.</span>
+
+<span class="sd">    n_iter_ : int</span>
+<span class="sd">        The number of iterations run by the spreading function.</span>
+
+<span class="sd">    n_outputs_ : int</span>
+<span class="sd">        Number of outputs.</span>
+
+<span class="sd">    filterFactory_ : class</span>
+<span class="sd">        Class used to create the filters.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from multifilter import RankSimilarityClassifier</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.datasets import make_classification</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.model_selection import train_test_split </span>
+<span class="sd">    &gt;&gt;&gt; X, y = make_classification(n_samples=1000, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; clf = RankSimilarityClassifier().fit(X_train,y_train)</span>
+<span class="sd">    &gt;&gt;&gt; clf.predict_proba(X_test[:1, :])</span>
+<span class="sd">    array([[0.43370805, 0.56629195]])</span>
+<span class="sd">    &gt;&gt;&gt; clf.predict(X_test[:5, :])</span>
+<span class="sd">    array([1, 0, 1, 0, 1])</span>
+<span class="sd">    &gt;&gt;&gt; clf.score(X_test, y_test)</span>
+<span class="sd">    0.888</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="nd">@_deprecate_positional_args</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> 
+                <span class="n">n_filters</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">max_filters</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span> <span class="n">n_fast_filters</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                <span class="n">initialize</span> <span class="o">=</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">spreading</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> 
+                <span class="n">class_weight</span> <span class="o">=</span> <span class="s1">&#39;balanced&#39;</span><span class="p">,</span> <span class="n">n_iter</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">filter_function</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> 
+                <span class="n">create_distribution</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">per_label</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_filters</span> <span class="o">=</span> <span class="n">n_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_filters</span> <span class="o">=</span> <span class="n">max_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_fast_filters</span> <span class="o">=</span> <span class="n">n_fast_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span> <span class="o">=</span> <span class="n">initialize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spreading</span> <span class="o">=</span> <span class="n">spreading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_weight</span> <span class="o">=</span> <span class="n">class_weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_function</span> <span class="o">=</span> <span class="n">filter_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_distribution</span> <span class="o">=</span> <span class="n">create_distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">per_label</span> <span class="o">=</span> <span class="n">per_label</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;poor_score&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;_xfail_checks&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;check_classifiers_classes&#39;</span><span class="p">:</span> 
+                <span class="s1">&#39;Not enough features to predict 3 classes correctly&#39;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit rank similarity classifier from the training dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix}, shape (n_samples, n_features)</span>
+<span class="sd">            The training input samples.</span>
+
+<span class="sd">        y : ndarray, shape (n_samples,)</span>
+<span class="sd">            Target values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="k">if</span> <span class="n">n_features</span> <span class="o">&lt;</span> <span class="n">n_classes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_classes</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;RankSimilarityClassifier needs at least </span><span class="si">%i</span><span class="s2"> features to separate </span><span class="si">%i</span><span class="s2"> classes.&quot;</span>
+                             <span class="o">%</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_classes</span><span class="p">),</span> <span class="n">n_classes</span><span class="p">),</span>
+                              <span class="n">DataDimensionalityWarning</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_design_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_initialize</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_spreading</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_n_filters</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_filters_per_class</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assign_filter_labels</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preallocate_filters</span><span class="p">(</span><span class="n">n_features</span><span class="p">)</span>
+
+        <span class="n">st_filt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">iclass</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterFactory_</span><span class="o">.</span><span class="n">per_label</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filterFactory_</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">iclass</span>
+            <span class="n">end_filt</span> <span class="o">=</span> <span class="n">st_filt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_class_filters_</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_filters</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">iclass</span><span class="p">,:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n_features</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">[:,</span><span class="n">st_filt</span><span class="p">:</span><span class="n">end_filt</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_spread_filters</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">iclass</span><span class="p">,:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n_features</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">[:,</span><span class="n">st_filt</span><span class="p">:</span><span class="n">end_filt</span><span class="p">])</span>
+
+            <span class="n">st_filt</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_class_filters_</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">_unit_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># consider multiplying this by some number for large n_features</span>
+        
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predict using the rank similarity classifier</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">            The input data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y : ndarray, shape (n_samples,)</span>
+<span class="sd">            The predicted classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        
+        <span class="n">response</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">)</span>
+        <span class="n">max_response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">bool_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">max_response</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+        <span class="n">n_max_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">bool_max</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">n_max_vals</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># simple usual case</span>
+            <span class="n">max_filters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">bool_max</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">max_filters</span><span class="p">]</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># deal with single max first</span>
+            <span class="n">max_filters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">max_filters</span><span class="p">[</span><span class="n">n_max_vals</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">bool_max</span><span class="p">[</span><span class="n">n_max_vals</span><span class="o">==</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">max_filters</span><span class="p">]</span>
+            
+            <span class="c1"># fix y_pred for multiple max</span>
+            <span class="n">ind_multi_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">n_max_vals</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">isamp</span> <span class="ow">in</span> <span class="n">ind_multi_max</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">bool_max</span><span class="p">[</span><span class="n">isamp</span><span class="p">,:]]</span>
+                <span class="n">pred_mode</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">mode</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+                <span class="n">y_pred</span><span class="p">[</span><span class="n">isamp</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">y_pred</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">n_best</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Probability estimates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">            The input data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y_prob : ndarray of shape (n_samples, n_classes)</span>
+<span class="sd">            The predicted probability of the sample for each class in the</span>
+<span class="sd">            model, where classes are ordered as they are in `self.classes_`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="o">.</span><span class="n">size</span>
+        
+        <span class="n">response_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_function</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_best</span><span class="p">)</span>
+
+        <span class="n">class_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">iclass</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">):</span>
+            <span class="n">inc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="o">==</span><span class="n">iclass</span>
+            <span class="n">class_response</span><span class="p">[:,</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">response_match</span><span class="p">[:,</span><span class="n">inc</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+        <span class="n">class_response</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">class_response</span><span class="p">)</span>
+
+        <span class="c1"># check for multiple max classes and adjust</span>
+        <span class="n">max_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">class_response</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span><span class="n">class_response</span><span class="p">)</span>
+        <span class="n">mult_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">max_classes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">isamp</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">mult_max</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">samp_class_resp</span> <span class="o">=</span> <span class="n">class_response</span><span class="p">[</span><span class="n">isamp</span><span class="p">,:]</span>
+
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">response_match</span><span class="p">[</span><span class="n">isamp</span><span class="p">,:]</span> <span class="o">==</span> <span class="n">samp_class_resp</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">samp_class_resp</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">samp_class_resp</span><span class="o">*</span><span class="n">counts</span>
+            
+        <span class="k">return</span> <span class="n">_unit_norm</span><span class="p">(</span><span class="n">class_response</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RSPClassifier"><a class="viewcode-back" href="../../generated/ranksim.RSPClassifier.html#ranksim.RSPClassifier">[docs]</a><span class="k">class</span> <span class="nc">RSPClassifier</span><span class="p">(</span><span class="n">RankSimilarityMixin</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Rank Similarity Probabilistic (RSP) Classifier </span>
+
+<span class="sd">    Read more in the :ref:`User Guide &lt;classification&gt;`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_filters : {&#39;auto&#39;} or int, default=&#39;auto&#39;</span>
+<span class="sd">        Number of filters to use. &#39;auto&#39; will determine this based on</span>
+<span class="sd">        max_filters, n_fast_filters and the size of the input data.</span>
+
+<span class="sd">    max_filters : int, default=5000</span>
+<span class="sd">        Maximum number of filters to allocate.</span>
+
+<span class="sd">        Only used when ``n_filters=&#39;auto&#39;``.</span>
+
+<span class="sd">    n_fast_filters: int, default=1000</span>
+<span class="sd">        Minimum number of filters to allocate, unless the input data has</span>
+<span class="sd">        fewer samples than this number.</span>
+
+<span class="sd">        Only used when ``n_filters=&#39;auto&#39;``.</span>
+
+<span class="sd">    initialize : {&#39;random&#39;,&#39;weighted_avg&#39;,&#39;plusplus&#39;}, default=&#39;random&#39;</span>
+<span class="sd">        Type of filter initialization.</span>
+
+<span class="sd">        - &#39;random&#39;, filters are initialized with a random data point.</span>
+
+<span class="sd">        - &#39;weighted_avg&#39;, creates filters from similar data, used when </span>
+<span class="sd">            there are more filters than input data.</span>
+<span class="sd">        </span>
+<span class="sd">        - &#39;plusplus&#39;, filters are initialized with dissimilar data as k-means++</span>
+
+<span class="sd">    spreading : {&#39;max&#39;, &#39;weighted_avg&#39;} or None, default=&#39;max&#39;</span>
+<span class="sd">        Determines how data is spread between filters during training</span>
+
+<span class="sd">        - &#39;max&#39;, the data point is allocated to the maximum responding</span>
+<span class="sd">            filter.</span>
+
+<span class="sd">        - &#39;weighted_avg&#39;, the weighted average of a fixed number of data </span>
+<span class="sd">            points are allocated to the maximum responding filter, used</span>
+<span class="sd">            when there are more filters than data.</span>
+<span class="sd">        </span>
+<span class="sd">    n_iter : int, default=5</span>
+<span class="sd">        Number of iterations/sweeps over the training dataset to perform</span>
+<span class="sd">        during training.</span>
+
+<span class="sd">    random_state : int, RandomState instance, default=None</span>
+<span class="sd">        Determines random number generation for filter initialization.</span>
+<span class="sd">        Pass an int for reproducible results across multiple function calls.</span>
+
+<span class="sd">    filter_function : {&#39;auto&#39;} or callable, default=&#39;auto&#39;</span>
+<span class="sd">        Function which determines the weights from subsections of the input</span>
+<span class="sd">        data. &#39;auto&#39; performs a mean and rank, optionally drawn from a </span>
+<span class="sd">        distribution.</span>
+
+<span class="sd">    create_distribution : {&#39;confusion&#39;}, callable or None, default=None</span>
+<span class="sd">        Creates a distribution to draw ranks from. </span>
+
+<span class="sd">        - &#39;confusion&#39; is a distribution based on the confusibility of</span>
+<span class="sd">            features in the input data.</span>
+<span class="sd">        </span>
+<span class="sd">        Note: the &#39;confusion&#39; option is extremely slow.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    classes_ : ndarray or list of ndarray of shape (n_classes,)</span>
+<span class="sd">        Class labels for each output.</span>
+<span class="sd">        </span>
+<span class="sd">    filters_ : ndarray of shape (n_filters\_, n_features)</span>
+<span class="sd">        Weights of the calculated filters.</span>
+
+<span class="sd">    filter_labels_ : list of ndarray of shape (n_classes,)</span>
+<span class="sd">        Label of the datapoints used to make the filter.</span>
+
+<span class="sd">    n_filters_ : int</span>
+<span class="sd">        Number of filters.</span>
+
+<span class="sd">    n_iter_ : int</span>
+<span class="sd">        The number of iterations run by the spreading function.</span>
+
+<span class="sd">    n_outputs_ : int</span>
+<span class="sd">        Number of outputs.</span>
+
+<span class="sd">    filterFactory_ : class</span>
+<span class="sd">        Class used to create the filters.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from multifilter import RSPClassifier</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.datasets import make_classification</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.model_selection import train_test_split</span>
+<span class="sd">    &gt;&gt;&gt; X, y = make_classification(n_samples=1000, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; clf = RSPClassifier().fit(X_train,y_train)</span>
+<span class="sd">    &gt;&gt;&gt; clf.predict_proba(X_test[:1,:])</span>
+<span class="sd">    array([[0.43370805, 0.56629195]])</span>
+<span class="sd">    &gt;&gt;&gt; clf.predict(X_test[:5, :])</span>
+<span class="sd">    array([1, 0, 1, 0, 1])</span>
+<span class="sd">    &gt;&gt;&gt; clf.score(X_test, y_test)</span>
+<span class="sd">    0.888</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="nd">@_deprecate_positional_args</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> 
+                <span class="n">n_filters</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">max_filters</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">n_fast_filters</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> 
+                <span class="n">initialize</span> <span class="o">=</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">spreading</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> 
+                <span class="n">n_iter</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  
+                <span class="n">filter_function</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">create_distribution</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_filters</span> <span class="o">=</span> <span class="n">n_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_filters</span> <span class="o">=</span> <span class="n">max_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_fast_filters</span> <span class="o">=</span> <span class="n">n_fast_filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span> <span class="o">=</span> <span class="n">initialize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spreading</span> <span class="o">=</span> <span class="n">spreading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_function</span> <span class="o">=</span> <span class="n">filter_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_distribution</span> <span class="o">=</span> <span class="n">create_distribution</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;multioutput&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;poor_score&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;_xfail_checks&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;check_classifiers_classes&#39;</span><span class="p">:</span> 
+                <span class="s1">&#39;Not enough features to predict 3 classes correctly&#39;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit RSP classifier from the training dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix}, shape (n_samples, n_features)</span>
+<span class="sd">            The training input samples.</span>
+
+<span class="sd">        y : {array-like, sparse matrix}, shape (n_samples,) or (n_samples, n_outputs)</span>
+<span class="sd">            Target values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">multi_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        
+        <span class="c1"># remove bad samples from all calculations</span>
+        <span class="n">zero_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">zero_X</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">zero_X</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">zero_X</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">zero_X</span><span class="p">)]</span>
+        
+        <span class="c1"># setup for multilabel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sparse_output_</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="k">if</span> <span class="n">issparse</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse_output_</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            
+        <span class="c1">#y = check_array(y)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_outputs_</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_prior_</span> <span class="o">=</span> <span class="n">class_distribution</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="c1"># could include sample_weight here</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;RSPClassifier cannot be fit when only one class is present.&quot;</span><span class="p">)</span>
+
+        <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">max_labels</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes_</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_features</span> <span class="o">&lt;</span> <span class="n">max_labels</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_labels</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;RSPClassifier needs at least </span><span class="si">%i</span><span class="s2"> features to separate </span><span class="si">%i</span><span class="s2"> labels.&quot;</span>
+                              <span class="o">%</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">max_labels</span><span class="p">),</span> <span class="n">max_labels</span><span class="p">),</span>
+                              <span class="n">DataDimensionalityWarning</span><span class="p">)</span>
+        
+        <span class="c1"># design filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_design_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_initialize</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_spreading</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_n_filters</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preallocate_filters</span><span class="p">(</span><span class="n">n_features</span><span class="p">)</span>
+           
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spread_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">_unit_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assign_filter_labels</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_outputs_</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_assign_filter_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">classes_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">X</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters_</span>
+
+        <span class="n">winners</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">uniq_winners</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">winners</span><span class="p">)</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_filters_</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">classes_</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">ifilt</span> <span class="ow">in</span> <span class="n">uniq_winners</span><span class="p">:</span>
+            <span class="n">filt_class</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">winners</span> <span class="o">==</span> <span class="n">ifilt</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">classes_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes_</span><span class="p">):</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="n">ifilt</span><span class="p">,:]</span>
+
+                <span class="n">inc_labels</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">filt_class</span><span class="p">[:,</span><span class="n">ii</span><span class="p">],</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+                <span class="n">inc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">classes_i</span><span class="p">,</span> <span class="n">inc_labels</span><span class="p">,</span> <span class="n">assume_unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">label</span><span class="p">[</span><span class="n">inc</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>
+        
+        <span class="n">losers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_filters_</span><span class="p">),</span> <span class="n">uniq_winners</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">losers</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># could take highest responding here</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="n">losers</span><span class="p">,:]</span> <span class="o">=</span> <span class="mi">1</span>
+            
+        <span class="c1"># convert counts to probabilities        </span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">_unit_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predict using the RSP classifier</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">            The input data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y : ndarray, shape (n_samples,) or (n_samples, n_classes)</span>
+<span class="sd">            The predicted classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_outputs_</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">prob</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#predict = np.zeros((X.shape[0],len(prob)))</span>
+            <span class="n">predict</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">iclass</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prob</span><span class="p">)):</span>
+                <span class="n">pred_ind</span> <span class="o">=</span> <span class="n">prob</span><span class="p">[</span><span class="n">iclass</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">predict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">iclass</span><span class="p">][</span><span class="n">pred_ind</span><span class="p">])</span>
+            <span class="n">predict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predict</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        
+        <span class="k">return</span> <span class="n">predict</span>
+    
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">n_best</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Probability estimates for RSP classifier</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : {array-like, sparse matrix} of shape (n_samples, n_features)</span>
+<span class="sd">            The input data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y_prob : ndarray of shape (n_samples, n_classes)</span>
+<span class="sd">            The predicted probability of the sample for each class in the</span>
+<span class="sd">            model, where classes are ordered as they are in `self.classes_`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_input</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        
+        <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_outputs_</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">classes_</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">classes_</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">classes_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span>
+        
+        <span class="n">response_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_function</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_best</span><span class="p">)</span>
+        <span class="n">response_match</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">response_match</span><span class="p">)</span>
+        <span class="n">response_match</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">(</span><span class="n">response_match</span><span class="p">)</span>
+        
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">classes_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes_</span><span class="p">):</span>
+            <span class="n">class_resp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">classes_i</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">ilabel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">classes_i</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">response_match</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_labels_</span><span class="p">[</span><span class="n">ii</span><span class="p">][:,</span><span class="n">ilabel</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:])</span>
+                <span class="n">class_resp</span><span class="p">[:,</span><span class="n">ilabel</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="c1"># turn to probabilites</span>
+            <span class="n">zero_row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">class_resp</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="n">class_resp</span><span class="p">[</span><span class="n">zero_row</span><span class="p">,:]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">class_resp</span> <span class="o">=</span> <span class="n">_unit_norm</span><span class="p">(</span><span class="n">class_resp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+            <span class="n">probabilities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">class_resp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_outputs_</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">probabilities</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Katharine Shapcott.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

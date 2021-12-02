@@ -1,0 +1,12 @@
+﻿:mod:`ranksim`.RankSimilarityTransform
+=============================================
+
+.. currentmodule:: ranksim
+
+.. autoclass:: RankSimilarityTransform
+
+.. include:: ranksim.RankSimilarityTransform.examples
+
+.. raw:: html
+
+    <div style='clear:both'></div>

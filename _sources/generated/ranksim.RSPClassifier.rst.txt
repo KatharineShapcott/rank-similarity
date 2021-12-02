@@ -1,0 +1,12 @@
+﻿:mod:`ranksim`.RSPClassifier
+===================================
+
+.. currentmodule:: ranksim
+
+.. autoclass:: RSPClassifier
+
+.. include:: ranksim.RSPClassifier.examples
+
+.. raw:: html
+
+    <div style='clear:both'></div>

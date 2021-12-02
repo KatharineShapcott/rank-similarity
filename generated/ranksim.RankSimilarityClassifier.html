@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ranksim.RankSimilarityClassifier &mdash; rank-similarity 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/project-template.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/js/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ranksim.RSPClassifier" href="ranksim.RSPClassifier.html" />
+    <link rel="prev" title="ranksim.RankSimilarityTransform" href="ranksim.RankSimilarityTransform.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> rank-similarity
+          </a>
+              <div class="version">
+                0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start with Rank Similarity</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">User guide: Using the Rank Similarity estimators</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Rank Similarity API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#transformer">Transformer</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#predictors">Predictors</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#multiclass">Multiclass</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ranksim</span></code>.RankSimilarityClassifier</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#multiclass-and-multilabel">Multiclass and multilabel</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial - Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">General examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rank-similarity</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Rank Similarity API</a> &raquo;</li>
+      <li><code class="xref py py-mod docutils literal notranslate"><span class="pre">ranksim</span></code>.RankSimilarityClassifier</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/ranksim.RankSimilarityClassifier.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ranksim-ranksimilarityclassifier">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">ranksim</span></code>.RankSimilarityClassifier<a class="headerlink" href="#ranksim-ranksimilarityclassifier" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ranksim.RankSimilarityClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ranksim.</span></span><span class="sig-name descname"><span class="pre">RankSimilarityClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fast_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initialize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spreading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_distribution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ranksim/_classes.html#RankSimilarityClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ranksim.RankSimilarityClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rank Similarity Classifier</p>
+<p>Read more in the <a class="reference internal" href="../user_guide.html#classification"><span class="std std-ref">User Guide</span></a>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>n_filters</strong><span class="classifier">{‘auto’} or int, default=’auto’</span></dt><dd><p>Number of filters to use. ‘auto’ will determine this based on
+max_filters, n_fast_filters and the size of the input data.</p>
+</dd>
+<dt><strong>max_filters</strong><span class="classifier">int, default=5000</span></dt><dd><p>Maximum number of filters to allocate.</p>
+<p>Only used when <code class="docutils literal notranslate"><span class="pre">n_filters='auto'</span></code>.</p>
+</dd>
+<dt><strong>n_fast_filters: int, default=1000</strong></dt><dd><p>Minimum number of filters to allocate, unless the input data has
+fewer samples than this number.</p>
+<p>Only used when <code class="docutils literal notranslate"><span class="pre">n_filters='auto'</span></code>.</p>
+</dd>
+<dt><strong>initialize</strong><span class="classifier">{‘random’,’weighted_avg’,’plusplus’}, default=’random’</span></dt><dd><p>Type of filter initialization.</p>
+<ul class="simple">
+<li><p>‘random’, filters are initialized with a random data point.</p></li>
+<li><dl class="simple">
+<dt>‘weighted_avg’, creates filters from similar data, used when </dt><dd><p>there are more filters than input data.</p>
+</dd>
+</dl>
+</li>
+<li><p>‘plusplus’, filters are initialized with dissimilar data as k-means++</p></li>
+</ul>
+</dd>
+<dt><strong>spreading</strong><span class="classifier">{‘max’, ‘weighted_avg’} or None, default=’max’</span></dt><dd><p>Determines how data is spread between filters during training</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>‘max’, the data point is allocated to the maximum responding</dt><dd><p>filter.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘weighted_avg’, the weighted average of a fixed number of data </dt><dd><p>points are allocated to the maximum responding filter, used
+when there are more filters than data.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>class_weight</strong><span class="classifier">{‘balanced’,’uniform’} or dict, {class_label: weight}             default=’balanced’</span></dt><dd><p>Used to calculate the number of filters assigned to each class.
+The “balanced” mode uses the values of y to automatically adjust
+weights inversely proportional to class frequencies in the input data
+as <code class="docutils literal notranslate"><span class="pre">n_samples</span> <span class="pre">/</span> <span class="pre">(n_classes</span> <span class="pre">*</span> <span class="pre">np.bincount(y))</span></code></p>
+</dd>
+<dt><strong>n_iter</strong><span class="classifier">int, default=5</span></dt><dd><p>Number of iterations/sweeps over the training dataset to perform
+during training.</p>
+</dd>
+<dt><strong>random_state</strong><span class="classifier">int, RandomState instance, default=None</span></dt><dd><p>Determines random number generation for filter initialization.
+Pass an int for reproducible results across multiple function calls.</p>
+</dd>
+<dt><strong>filter_function</strong><span class="classifier">{‘auto’} or callable, default=’auto’</span></dt><dd><p>Function which determines the weights from subsections of the input
+data. ‘auto’ performs a mean and rank, optionally drawn from a 
+distribution.</p>
+</dd>
+<dt><strong>create_distribution</strong><span class="classifier">{‘confusion’}, callable or None, default=None</span></dt><dd><p>Creates a distribution to draw ranks from.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>‘confusion’ is a distribution based on the confusibility of</dt><dd><p>features in the input data.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Note: the ‘confusion’ option is extremely slow.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>classes_</strong><span class="classifier">ndarray or list of ndarray of shape (n_classes,)</span></dt><dd><p>Class labels for each output.</p>
+</dd>
+<dt><strong>filters_</strong><span class="classifier">ndarray of shape (n_filters_, n_features)</span></dt><dd><p>Weights of the calculated filters.</p>
+</dd>
+<dt><strong>filter_labels_</strong><span class="classifier">list of ndarray of shape (n_classes,)</span></dt><dd><p>Label of the datapoints used to make the filter.</p>
+</dd>
+<dt><strong>n_class_filters_</strong><span class="classifier">ndarray of shape (n_classes,)</span></dt><dd><p>Number of filters assigned to each class</p>
+</dd>
+<dt><strong>n_filters_</strong><span class="classifier">int</span></dt><dd><p>Number of filters.</p>
+</dd>
+<dt><strong>n_iter_</strong><span class="classifier">int</span></dt><dd><p>The number of iterations run by the spreading function.</p>
+</dd>
+<dt><strong>n_outputs_</strong><span class="classifier">int</span></dt><dd><p>Number of outputs.</p>
+</dd>
+<dt><strong>filterFactory_</strong><span class="classifier">class</span></dt><dd><p>Class used to create the filters.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">multifilter</span> <span class="kn">import</span> <span class="n">RankSimilarityClassifier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span> <span class="o">=</span> <span class="n">RankSimilarityClassifier</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span><span class="n">y_train</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+<span class="go">array([[0.43370805, 0.56629195]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:</span><span class="mi">5</span><span class="p">,</span> <span class="p">:])</span>
+<span class="go">array([1, 0, 1, 0, 1])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clf</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="go">0.888</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(X, y)</p></td>
+<td><p>Fit rank similarity classifier from the training dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>([deep])</p></td>
+<td><p>Get parameters for this estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code>(X)</p></td>
+<td><p>Predict using the rank similarity classifier</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_proba</span></code>(X[, n_best])</p></td>
+<td><p>Probability estimates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">score</span></code>(X, y[, sample_weight])</p></td>
+<td><p>Return the mean accuracy on the given test data and labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(**params)</p></td>
+<td><p>Set the parameters of this estimator.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div></section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ranksim.RankSimilarityTransform.html" class="btn btn-neutral float-left" title="ranksim.RankSimilarityTransform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ranksim.RSPClassifier.html" class="btn btn-neutral float-right" title="ranksim.RSPClassifier" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Katharine Shapcott.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
