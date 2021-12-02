@@ -52,7 +52,7 @@ The package is new BSD licensed.
 Please cite the following publication (in preparation) [[1]](#1).
 
 <a id="1">[1]</a> 
-Shapcott, Bird, & Singer. Confusion-based rank similarity filters for computationally-efficient machine learning on high dimensional data. In preperation. (2021)
+Shapcott & Bird. Confusion-based rank similarity filters for computationally-efficient machine learning on high dimensional data. arXiv [cs.LG]. 2021. Available from: http://arxiv.org/abs/2109.13610
 
 ## Contributors
 
